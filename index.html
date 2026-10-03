@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>College Library Management System</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>College Library</h1>
+      <p>Management System</p>
+    </div>
+    <div class="topbar-tools">
+      <label class="date-control" for="sysDate">
+        Library date
+        <input type="date" id="sysDate">
+      </label>
+      <button type="button" class="btn" id="btnResetDate">Use today</button>
+      <span class="sim-flag" id="simFlag" hidden>Simulated date</span>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" class="tab is-active" data-tab="books">Books</button>
+    <button type="button" class="tab" data-tab="students">Students</button>
+    <button type="button" class="tab" data-tab="circulation">Issue &amp; Return</button>
+    <button type="button" class="tab" data-tab="records">Records</button>
+    <button type="button" class="tab" data-tab="tests">Test cases</button>
+  </nav>
+
+  <main>
+
+    <!-- BOOKS -->
+    <section id="tab-books" class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Books</h2>
+          <p class="muted" id="bookSummary"></p>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="bookSearch" placeholder="Search by title, author or ISBN" aria-label="Search books">
+          <button type="button" class="btn btn-primary" id="btnAddBook">Add book</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ISBN</th><th>Title</th><th>Author</th><th>Category</th>
+              <th class="num">Copies</th><th class="num">Available</th><th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section id="tab-students" class="panel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>Students</h2>
+          <p class="muted" id="studentSummary"></p>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="studentSearch" placeholder="Search by ID, name or department" aria-label="Search students">
+          <button type="button" class="btn btn-primary" id="btnAddStudent">Add student</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th><th>Name</th><th>Department</th><th>Email</th>
+              <th class="num">Books held</th><th class="num">Fine due</th><th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CIRCULATION -->
+    <section id="tab-circulation" class="panel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>Issue &amp; Return</h2>
+          <p class="muted">Loan period 14 days &middot; maximum 3 books per student &middot; late fine &#8377;2 per day</p>
+        </div>
+      </div>
+
+      <form id="issueForm" class="card form-row" novalidate>
+        <div class="field">
+          <label for="issueStudent">Student</label>
+          <select id="issueStudent"></select>
+        </div>
+        <div class="field grow">
+          <label for="issueBook">Book</label>
+          <select id="issueBook"></select>
+        </div>
+        <div class="field">
+          <label>Dates</label>
+          <p class="static" id="issueDates"></p>
+        </div>
+        <div class="field">
+          <button type="submit" class="btn btn-primary">Issue book</button>
+        </div>
+      </form>
+
+      <h3>Books currently issued</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loan</th><th>Student</th><th>Book</th><th>Issued</th><th>Due</th>
+              <th>Status</th><th class="num">Fine so far</th><th class="actions-col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="activeRows"></tbody>
+        </table>
+      </div>
+
+      <h3>Fines awaiting payment</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loan</th><th>Student</th><th>Book</th><th>Returned</th>
+              <th class="num">Days late</th><th class="num">Fine</th><th class="actions-col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="fineRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RECORDS -->
+    <section id="tab-records" class="panel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>Borrowing records</h2>
+          <p class="muted">Every issue and return, kept even after a book or student is removed.</p>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="recordSearch" placeholder="Search student or book" aria-label="Search records">
+          <select id="recordFilter" aria-label="Filter records">
+            <option value="all">All records</option>
+            <option value="active">Currently issued</option>
+            <option value="overdue">Overdue</option>
+            <option value="returned">Returned</option>
+            <option value="unpaid">Fine unpaid</option>
+            <option value="paid">Fine paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loan</th><th>Student</th><th>Book</th><th>Issued</th><th>Due</th>
+              <th>Returned</th><th class="num">Fine</th><th>Fine status</th>
+            </tr>
+          </thead>
+          <tbody id="recordRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TESTS -->
+    <section id="tab-tests" class="panel" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>Test cases</h2>
+          <p class="muted">Tests run on a separate in-memory store, so your real library data is never touched.</p>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary" id="btnRunTests">Run all tests</button>
+        </div>
+      </div>
+      <p class="test-summary" id="testSummary"></p>
+      <ul class="test-list" id="testList"></ul>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>Data is saved in this browser (localStorage).</span>
+    <span>
+      <button type="button" class="link-btn" id="btnSample">Load sample data</button>
+      <button type="button" class="link-btn danger" id="btnClear">Clear all data</button>
+    </span>
+  </footer>
+
+  <!-- Book dialog -->
+  <dialog id="bookDialog" class="dialog">
+    <form id="bookForm" novalidate>
+      <h2 id="bookDialogTitle">Add book</h2>
+      <input type="hidden" id="bk-id">
+      <div class="field">
+        <label for="bk-isbn">ISBN</label>
+        <input id="bk-isbn" type="text" placeholder="e.g. 978-0-13-235088-4" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="bk-title">Title</label>
+        <input id="bk-title" type="text" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="bk-author">Author</label>
+        <input id="bk-author" type="text" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="bk-category">Category</label>
+        <input id="bk-category" type="text" list="categoryList" autocomplete="off">
+        <datalist id="categoryList"></datalist>
+      </div>
+      <div class="field">
+        <label for="bk-copies">Total copies</label>
+        <input id="bk-copies" type="number" min="1" step="1" value="1">
+      </div>
+      <p class="form-error" id="bookError" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary" id="bookSubmit">Save book</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Student dialog -->
+  <dialog id="studentDialog" class="dialog">
+    <form id="studentForm" novalidate>
+      <h2 id="studentDialogTitle">Add student</h2>
+      <input type="hidden" id="st-mode">
+      <div class="field">
+        <label for="st-id">Student ID</label>
+        <input id="st-id" type="text" placeholder="e.g. CS2023001" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="st-name">Full name</label>
+        <input id="st-name" type="text" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="st-dept">Department</label>
+        <input id="st-dept" type="text" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="st-email">Email</label>
+        <input id="st-email" type="email" autocomplete="off">
+      </div>
+      <p class="form-error" id="studentError" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save student</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Student account dialog -->
+  <dialog id="accountDialog" class="dialog wide">
+    <div class="dialog-head">
+      <h2 id="accTitle">Student account</h2>
+      <button type="button" class="btn" data-close>Close</button>
+    </div>
+    <div id="accBody"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+</body>
+</html>
